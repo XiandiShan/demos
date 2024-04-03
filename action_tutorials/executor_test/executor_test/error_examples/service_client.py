@@ -15,41 +15,33 @@
 from example_interfaces.srv import AddTwoInts
 
 import rclpy
+from rclpy.node import Node
+from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
+
 
 class AddTwoIntsClient:
     def __init__(self, node):
-        self.node = node
-        self.cli = self.node.create_client(AddTwoInts, 'add_two_ints')
+        # super().__init__('add_two_ints_client')
 
+        self.node = node
+        self.client = self.node.create_client(AddTwoInts, 'add_two_ints', callback_group=ReentrantCallbackGroup())
+    
     def call_add_two_ints(self):
-        while not self.cli.wait_for_service(timeout_sec=1.0):
-            print('service not available, waiting again...')
-        self.req = AddTwoInts.Request()
-        self.req.a = 2
-        self.req.b = 3
-        self.future = self.cli.call_async(self.req)
-        self.node.executor.spin_until_future_complete(self.future)
-        if self.future.result() is not None:
-            self.node.get_logger().info('Result of add_two_ints: %d' % self.future.result().sum)
+        while not self.client.wait_for_service(timeout_sec=1.0):
+            self.node.get_logger().info('service not available, waiting again...')
+        req = AddTwoInts.Request()
+        req.a = 2
+        req.b = 3
+        future = self.client.call_async(req)
+        self.node.executor.spin_until_future_complete(future)
+        if future.result() is not None:
+            self.node.get_logger().info('Result of add_two_ints: %d' % future.result().sum)
+            res = AddTwoInts.Response()
+            res.sum = future.result().sum
+            return res
         else:
-            self.node.get_logger().error('Exception while calling service: %r' % self.future.exception())
-
-
-class AddTwoIntsClient2:
-    def __init__(self, node):
-        self.node = node
-        self.cli = self.node.create_client(AddTwoInts, 'add_two_ints')
-
-    def call_add_two_ints(self):
-        while not self.cli.wait_for_service(timeout_sec=1.0):
-            print('service not available, waiting again...')
-        self.req = AddTwoInts.Request()
-        self.req.a = 2
-        self.req.b = 3
-        self.future = self.cli.call_async(self.req)
-        self.node.executor.spin_until_future_complete(self.future)
-        if self.future.result() is not None:
-            self.node.get_logger().info('Result of add_two_ints: %d' % self.future.result().sum)
+            self.node.get_logger().error('Exception while calling service: %r' % future.exception())
+            return None
 
 
 def main(args=None):

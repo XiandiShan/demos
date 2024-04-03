@@ -18,6 +18,7 @@ from action_tutorials_interfaces.action import Fibonacci
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
+from demo_nodes_py.services.add_two_ints_client import AddTwoIntsClient
 
 
 class FibonacciActionClient(Node):
@@ -60,15 +61,46 @@ class FibonacciActionClient(Node):
         feedback = feedback_msg.feedback
         self.get_logger().info('Received feedback: {0}'.format(feedback.partial_sequence))
 
+    def send_goal_using_spin_future(self, order):
+        goal_msg = Fibonacci.Goal()
+        goal_msg.order = order
+
+        self._action_client.wait_for_server()
+
+        self._send_goal_future = self._action_client.send_goal_async(
+            goal_msg,
+            feedback_callback=self.feedback_callback)
+
+        self.executor.spin_once_until_future_complete(self._send_goal_future)
+
+        goal_handle = self._send_goal_future.result()
+
+        if not goal_handle.accepted:
+            self.get_logger().info('Goal rejected :(')
+            return
+
+        self.get_logger().info('Goal accepted :)')
+
+        self._get_result_future = goal_handle.get_result_async()
+
+    def get_result(self):
+        self.executor.spin_until_future_complete(self._get_result_future)
+        result = self._get_result_future.result().result
+        self.get_logger().info('Result: {0}'.format(result.sequence))
+
 
 def main(args=None):
     rclpy.init(args=args)
 
     action_client = FibonacciActionClient()
 
-    action_client.send_goal(10)
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(action_client)
 
-    rclpy.spin(action_client)
+    action_client.send_goal_using_spin_future(10)
+    action_client.get_result()
+
+    executor.spin()
 
 
 if __name__ == '__main__':
