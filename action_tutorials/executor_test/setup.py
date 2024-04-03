@@ -20,27 +20,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'service_server = executor_test.call_service_from_action.service_server:main',
-            'service_client = executor_test.call_service_from_action.service_client:main',
-            'action_server = executor_test.call_service_from_action.action_server:main',
-            'action_client = executor_test.call_service_from_action.action_client:main',
-
-            # 'service_server = executor_test.call_action_from_service.service_server:main',
-            # 'service_client = executor_test.call_action_from_service.service_client:main',
-            # 'action_server = executor_test.call_action_from_service.action_server:main',
-            # 'action_client = executor_test.call_action_from_service.action_client:main',
-
-            # 'first_action_server = executor_test.action_service_action.first_action_server:main',
-            # 'second_action_server = executor_test.action_service_action.second_action_server:main',
-            # 'first_action_client = executor_test.action_service_action.first_action_client:main',
-            # 'second_action_client = executor_test.action_service_action.second_action_client:main',
-            # 'service_server = executor_test.action_service_action.service_server:main',
-            # 'service_client = executor_test.action_service_action.service_client:main',
-
-            # 'service_server = executor_test.error_examples.service_server:main',
-            # 'service_client = executor_test.error_examples.service_client:main',
-            # 'action_server = executor_test.error_examples.action_server:main',
-            # 'action_client = executor_test.error_examples.action_client:main',
+            'service_server = executor_test.call_action_from_service.service_server:main',
+            'service_client = executor_test.call_action_from_service.service_client:main',
+            'action_server = executor_test.call_action_from_service.action_server:main',
+            'action_client = executor_test.call_action_from_service.action_client:main',
         ],
     },
 )
